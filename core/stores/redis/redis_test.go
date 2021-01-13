@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/alicebob/miniredis"
+	"github.com/alicebob/miniredis/v2"
 	red "github.com/go-redis/redis"
 	"github.com/stretchr/testify/assert"
 )
@@ -556,7 +556,7 @@ func TestRedis_SortedSet(t *testing.T) {
 		val, err = client.Zscore("key", "value1")
 		assert.Nil(t, err)
 		assert.Equal(t, int64(5), val)
-		val, err = NewRedis(client.Addr, "").Zadds("key")
+		_, err = NewRedis(client.Addr, "").Zadds("key")
 		assert.NotNil(t, err)
 		val, err = client.Zadds("key", Pair{
 			Key:   "value2",
@@ -567,9 +567,9 @@ func TestRedis_SortedSet(t *testing.T) {
 		})
 		assert.Nil(t, err)
 		assert.Equal(t, int64(2), val)
-		pairs, err := NewRedis(client.Addr, "").ZRevRangeWithScores("key", 1, 3)
+		_, err = NewRedis(client.Addr, "").ZRevRangeWithScores("key", 1, 3)
 		assert.NotNil(t, err)
-		pairs, err = client.ZRevRangeWithScores("key", 1, 3)
+		pairs, err := client.ZRevRangeWithScores("key", 1, 3)
 		assert.Nil(t, err)
 		assert.EqualValues(t, []Pair{
 			{
@@ -813,6 +813,38 @@ func TestRedisBlpopEx(t *testing.T) {
 		assert.NotNil(t, err)
 		_, _, err = client.BlpopEx(node, "foo")
 		assert.NotNil(t, err)
+	})
+}
+
+func TestRedisGeo(t *testing.T) {
+	runOnRedis(t, func(client *Redis) {
+		client.Ping()
+		var geoLocation = []*GeoLocation{{Longitude: 13.361389, Latitude: 38.115556, Name: "Palermo"}, {Longitude: 15.087269, Latitude: 37.502669, Name: "Catania"}}
+		v, err := client.GeoAdd("sicily", geoLocation...)
+		assert.Nil(t, err)
+		assert.Equal(t, int64(2), v)
+		v2, err := client.GeoDist("sicily", "Palermo", "Catania", "m")
+		assert.Nil(t, err)
+		assert.Equal(t, 166274, int(v2))
+		// GeoHash not support
+		v3, err := client.GeoPos("sicily", "Palermo", "Catania")
+		assert.Nil(t, err)
+		assert.Equal(t, int64(v3[0].Longitude), int64(13))
+		assert.Equal(t, int64(v3[0].Latitude), int64(38))
+		assert.Equal(t, int64(v3[1].Longitude), int64(15))
+		assert.Equal(t, int64(v3[1].Latitude), int64(37))
+		v4, err := client.GeoRadius("sicily", 15, 37, &red.GeoRadiusQuery{WithDist: true, Unit: "km", Radius: 200})
+		assert.Nil(t, err)
+		assert.Equal(t, int64(v4[0].Dist), int64(190))
+		assert.Equal(t, int64(v4[1].Dist), int64(56))
+		var geoLocation2 = []*GeoLocation{{Longitude: 13.583333, Latitude: 37.316667, Name: "Agrigento"}}
+		v5, err := client.GeoAdd("sicily", geoLocation2...)
+		assert.Nil(t, err)
+		assert.Equal(t, int64(1), v5)
+		v6, err := client.GeoRadiusByMember("sicily", "Agrigento", &red.GeoRadiusQuery{Unit: "km", Radius: 100})
+		assert.Nil(t, err)
+		assert.Equal(t, v6[0].Name, "Agrigento")
+		assert.Equal(t, v6[1].Name, "Palermo")
 	})
 }
 

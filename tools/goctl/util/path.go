@@ -60,7 +60,6 @@ func FindGoModPath(dir string) (string, bool) {
 	var hasGoMod = false
 	for {
 		if FileExists(filepath.Join(tempPath, goModeIdentifier)) {
-			tempPath = filepath.Dir(tempPath)
 			rootPath = strings.TrimPrefix(absDir[len(tempPath):], "/")
 			hasGoMod = true
 			break
@@ -78,5 +77,32 @@ func FindGoModPath(dir string) (string, bool) {
 	if hasGoMod {
 		return rootPath, true
 	}
+	return "", false
+}
+
+func FindProjectPath(loc string) (string, bool) {
+	var dir string
+	if strings.IndexByte(loc, '/') == 0 {
+		dir = loc
+	} else {
+		wd, err := os.Getwd()
+		if err != nil {
+			return "", false
+		}
+
+		dir = filepath.Join(wd, loc)
+	}
+
+	for {
+		if FileExists(filepath.Join(dir, goModeIdentifier)) {
+			return dir, true
+		}
+
+		dir = filepath.Dir(dir)
+		if dir == "/" {
+			break
+		}
+	}
+
 	return "", false
 }

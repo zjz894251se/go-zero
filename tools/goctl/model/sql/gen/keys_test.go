@@ -17,7 +17,6 @@ func TestGenCacheKeys(t *testing.T) {
 				Name:         stringx.From("id"),
 				DataBaseType: "bigint",
 				DataType:     "int64",
-				IsKey:        false,
 				IsPrimaryKey: true,
 				IsUniqueKey:  false,
 				Comment:      "自增id",
@@ -29,7 +28,6 @@ func TestGenCacheKeys(t *testing.T) {
 				Name:         stringx.From("mobile"),
 				DataBaseType: "varchar",
 				DataType:     "string",
-				IsKey:        false,
 				IsPrimaryKey: false,
 				IsUniqueKey:  true,
 				Comment:      "手机号",
@@ -38,7 +36,6 @@ func TestGenCacheKeys(t *testing.T) {
 				Name:         stringx.From("name"),
 				DataBaseType: "varchar",
 				DataType:     "string",
-				IsKey:        false,
 				IsPrimaryKey: false,
 				IsUniqueKey:  true,
 				Comment:      "姓名",
@@ -47,7 +44,6 @@ func TestGenCacheKeys(t *testing.T) {
 				Name:         stringx.From("createTime"),
 				DataBaseType: "timestamp",
 				DataType:     "time.Time",
-				IsKey:        false,
 				IsPrimaryKey: false,
 				IsUniqueKey:  false,
 				Comment:      "创建时间",
@@ -56,7 +52,6 @@ func TestGenCacheKeys(t *testing.T) {
 				Name:         stringx.From("updateTime"),
 				DataBaseType: "timestamp",
 				DataType:     "time.Time",
-				IsKey:        false,
 				IsPrimaryKey: false,
 				IsUniqueKey:  false,
 				Comment:      "更新时间",
@@ -67,11 +62,11 @@ func TestGenCacheKeys(t *testing.T) {
 
 	for fieldName, key := range m {
 		name := stringx.From(fieldName)
-		assert.Equal(t, fmt.Sprintf(`cacheUser%sPrefix = "cache#User#%s#"`, name.ToCamel(), name.UnTitle()), key.VarExpression)
+		assert.Equal(t, fmt.Sprintf(`cacheUser%sPrefix = "cache#User#%s#"`, name.ToCamel(), name.Untitle()), key.VarExpression)
 		assert.Equal(t, fmt.Sprintf(`cacheUser%sPrefix`, name.ToCamel()), key.Left)
-		assert.Equal(t, fmt.Sprintf(`cache#User#%s#`, name.UnTitle()), key.Right)
+		assert.Equal(t, fmt.Sprintf(`cache#User#%s#`, name.Untitle()), key.Right)
 		assert.Equal(t, fmt.Sprintf(`user%sKey`, name.ToCamel()), key.Variable)
-		assert.Equal(t, `user`+name.ToCamel()+`Key := fmt.Sprintf("%s%v", cacheUser`+name.ToCamel()+`Prefix,`+name.UnTitle()+`)`, key.KeyExpression)
+		assert.Equal(t, `user`+name.ToCamel()+`Key := fmt.Sprintf("%s%v", cacheUser`+name.ToCamel()+`Prefix,`+name.Untitle()+`)`, key.KeyExpression)
 	}
 
 }

@@ -46,6 +46,7 @@ func ToMap(in interface{}) map[string]interface{} {
 	return out
 }
 
+// deprecated: use RawFieldNames instead automaticly while model generating after goctl version v1.1.0
 func FieldNames(in interface{}) []string {
 	out := make([]string, 0)
 	v := reflect.ValueOf(in)
@@ -68,7 +69,8 @@ func FieldNames(in interface{}) []string {
 	}
 	return out
 }
-func FieldNamesAlias(in interface{}, alias string) []string {
+
+func RawFieldNames(in interface{}) []string {
 	out := make([]string, 0)
 	v := reflect.ValueOf(in)
 	if v.Kind() == reflect.Ptr {
@@ -82,16 +84,11 @@ func FieldNamesAlias(in interface{}, alias string) []string {
 	for i := 0; i < v.NumField(); i++ {
 		// gets us a StructField
 		fi := typ.Field(i)
-		tagName := ""
 		if tagv := fi.Tag.Get(dbTag); tagv != "" {
-			tagName = tagv
+			out = append(out, fmt.Sprintf("`%s`", tagv))
 		} else {
-			tagName = fi.Name
+			out = append(out, fmt.Sprintf(`"%s"`, fi.Name))
 		}
-		if len(alias) > 0 {
-			tagName = alias + "." + tagName
-		}
-		out = append(out, tagName)
 	}
 	return out
 }

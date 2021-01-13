@@ -12,13 +12,13 @@ import (
 	"time"
 
 	"github.com/logrusorgru/aurora"
-	"github.com/urfave/cli"
-
 	"github.com/tal-tech/go-zero/core/logx"
 	apiformat "github.com/tal-tech/go-zero/tools/goctl/api/format"
 	"github.com/tal-tech/go-zero/tools/goctl/api/parser"
 	apiutil "github.com/tal-tech/go-zero/tools/goctl/api/util"
+	"github.com/tal-tech/go-zero/tools/goctl/config"
 	"github.com/tal-tech/go-zero/tools/goctl/util"
+	"github.com/urfave/cli"
 )
 
 const tmpFile = "%s-%d"
@@ -28,6 +28,8 @@ var tmpDir = path.Join(os.TempDir(), "goctl")
 func GoCommand(c *cli.Context) error {
 	apiFile := c.String("api")
 	dir := c.String("dir")
+	namingStyle := c.String("style")
+
 	if len(apiFile) == 0 {
 		return errors.New("missing -api")
 	}
@@ -35,28 +37,30 @@ func GoCommand(c *cli.Context) error {
 		return errors.New("missing -dir")
 	}
 
-	return DoGenProject(apiFile, dir)
+	return DoGenProject(apiFile, dir, namingStyle)
 }
 
-func DoGenProject(apiFile, dir string) error {
-	p, err := parser.NewParser(apiFile)
+func DoGenProject(apiFile, dir, style string) error {
+	api, err := parser.Parse(apiFile)
 	if err != nil {
 		return err
 	}
-	api, err := p.Parse()
+
+	cfg, err := config.NewConfig(style)
 	if err != nil {
 		return err
 	}
 
 	logx.Must(util.MkdirIfNotExist(dir))
-	logx.Must(genEtc(dir, api))
-	logx.Must(genConfig(dir, api))
-	logx.Must(genMain(dir, api))
-	logx.Must(genServiceContext(dir, api))
-	logx.Must(genTypes(dir, api))
-	logx.Must(genHandlers(dir, api))
-	logx.Must(genRoutes(dir, api))
-	logx.Must(genLogic(dir, api))
+	logx.Must(genEtc(dir, cfg, api))
+	logx.Must(genConfig(dir, cfg, api))
+	logx.Must(genMain(dir, cfg, api))
+	logx.Must(genServiceContext(dir, cfg, api))
+	logx.Must(genTypes(dir, cfg, api))
+	logx.Must(genRoutes(dir, cfg, api))
+	logx.Must(genHandlers(dir, cfg, api))
+	logx.Must(genLogic(dir, cfg, api))
+	logx.Must(genMiddleware(dir, cfg, api))
 
 	if err := backupAndSweep(apiFile); err != nil {
 		return err

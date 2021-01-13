@@ -1,12 +1,13 @@
-<img align="right" width="150px" src="doc/images/go-zero.png">
+<img align="right" width="150px" src="https://gitee.com/kevwan/static/raw/master/doc/images/go-zero.png">
 
 # go-zero
 
 [English](readme-en.md) | 简体中文
 
 [![Go](https://github.com/tal-tech/go-zero/workflows/Go/badge.svg?branch=master)](https://github.com/tal-tech/go-zero/actions)
-[![codecov](https://codecov.io/gh/tal-tech/go-zero/branch/master/graph/badge.svg)](https://codecov.io/gh/tal-tech/go-zero)
 [![Go Report Card](https://goreportcard.com/badge/github.com/tal-tech/go-zero)](https://goreportcard.com/report/github.com/tal-tech/go-zero)
+[![goproxy](https://goproxy.cn/stats/github.com/tal-tech/go-zero/badges/download-count.svg)](https://goproxy.cn/stats/github.com/tal-tech/go-zero/badges/download-count.svg)
+[![codecov](https://codecov.io/gh/tal-tech/go-zero/branch/master/graph/badge.svg)](https://codecov.io/gh/tal-tech/go-zero)
 [![Release](https://img.shields.io/github/v/release/tal-tech/go-zero.svg?style=flat-square)](https://github.com/tal-tech/go-zero)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -25,7 +26,7 @@ go-zero 包含极简的 API 定义和生成工具 goctl，可以根据定义的 
 * 自动校验客户端请求参数合法性
 * 大量微服务治理和并发工具包
 
-<img src="doc/images/architecture.png" alt="架构图" width="1500" />
+<img src="https://gitee.com/kevwan/static/raw/master/doc/images/architecture.png" alt="架构图" width="1500" />
 
 ## 1. go-zero 框架背景
 
@@ -77,7 +78,7 @@ go-zero 是一个集成了各种工程实践的包含 web 和 rpc 框架，有�
 
 如下图，我们从多个层面保障了整体服务的高可用：
 
-![弹性设计](doc/images/resilience.jpg)
+![弹性设计](https://gitee.com/kevwan/static/raw/master/doc/images/resilience.jpg)
 
 觉得不错的话，别忘 **star** 👏
 
@@ -95,7 +96,7 @@ GO111MODULE=on GOPROXY=https://goproxy.cn/,direct go get -u github.com/tal-tech/
 
     [快速构建高并发微服务](https://github.com/tal-tech/zero-doc/blob/main/doc/shorturl.md)
 
-    [快速构建高并发微服务 - 多 RPC 版](https://github.com/tal-tech/zero-doc/blob/main/docs/frame/bookstore.md)
+    [快速构建高并发微服务 - 多 RPC 版](https://github.com/tal-tech/zero-doc/blob/main/docs/zero/bookstore.md)
 
 1. 安装 goctl 工具
 
@@ -120,7 +121,7 @@ GO111MODULE=on GOPROXY=https://goproxy.cn/,direct go get -u github.com/tal-tech/
     默认侦听在 8888 端口（可以在配置文件里修改），可以通过 curl 请求：
 
     ```shell
-    curl -i http://localhost:8888/greet/from/you
+    curl -i http://localhost:8888/from/you
     ```
 
     返回如下：
@@ -150,19 +151,19 @@ GO111MODULE=on GOPROXY=https://goproxy.cn/,direct go get -u github.com/tal-tech/
 
 ## 6. Benchmark
 
-![benchmark](doc/images/benchmark.png)
+![benchmark](https://gitee.com/kevwan/static/raw/master/doc/images/benchmark.png)
 
 [测试代码见这里](https://github.com/smallnest/go-web-framework-benchmark)
 
 ## 7. 文档
 
-* API 文档 (逐步完善中)
+* API 文档
 
   [https://www.yuque.com/tal-tech/go-zero](https://www.yuque.com/tal-tech/go-zero)
 
-* awesome 系列
+* awesome 系列（全部收录于『微服务实践』公众号）
   * [快速构建高并发微服务](https://github.com/tal-tech/zero-doc/blob/main/doc/shorturl.md)
-  * [快速构建高并发微服务 - 多 RPC 版](https://github.com/tal-tech/zero-doc/blob/main/docs/frame/bookstore.md)
+  * [快速构建高并发微服务 - 多 RPC 版](https://github.com/tal-tech/zero-doc/blob/main/docs/zero/bookstore.md)
   * [goctl 使用帮助](https://github.com/tal-tech/zero-doc/blob/main/doc/goctl.md)
   * [通过 MapReduce 降低服务响应时间](https://github.com/tal-tech/zero-doc/blob/main/doc/mapreduce.md)
   * [关键字替换和敏感词过滤工具](https://github.com/tal-tech/zero-doc/blob/main/doc/keywords.md)
@@ -171,8 +172,22 @@ GO111MODULE=on GOPROXY=https://goproxy.cn/,direct go get -u github.com/tal-tech/
   * [基于 prometheus 的微服务指标监控](https://github.com/tal-tech/zero-doc/blob/main/doc/metric.md)
   * [文本序列化和反序列化](https://github.com/tal-tech/zero-doc/blob/main/doc/mapping.md)
   * [快速构建 jwt 鉴权认证](https://github.com/tal-tech/zero-doc/blob/main/doc/jwt.md)
+  
+* 精选 `goctl` 插件
 
-## 8. 微信交流群
+  | 插件    | 用途  |
+  | ------------- |:-------------|
+  | [goctl-swagger](https://github.com/zeromicro/goctl-swagger) | 一键生成 `api` 的 `swagger` 文档 |
+  | [goctl-android](https://github.com/zeromicro/goctl-android) | 生成 `java (android)` 端 `http client` 请求代码 |
+  | [goctl-go-compact](https://github.com/zeromicro/goctl-go-compact) | 合并 `api` 里同一个 `group` 里的 `handler` 到一个 `go` 文件 |
+
+## 8. 微信公众号
+
+`go-zero` 相关文章都会在 `微服务实践` 公众号整理呈现，欢迎扫码关注，也可以通过公众号私信我 👏
+
+<img src="https://gitee.com/kevwan/static/raw/master/images/wechat-micro.jpg" alt="wechat" width="300" />
+
+## 9. 微信交流群
 
 如果文档中未能覆盖的任何疑问，欢迎您在群里提出，我们会尽快答复。
 
@@ -189,5 +204,3 @@ GO111MODULE=on GOPROXY=https://goproxy.cn/,direct go get -u github.com/tal-tech/
 项目地址：[https://github.com/tal-tech/go-zero](https://github.com/tal-tech/go-zero)
 
 码云地址：[https://gitee.com/kevwan/go-zero](https://gitee.com/kevwan/go-zero) (国内用户可访问gitee，每日自动从github同步代码)
-
-开源中国年度评选，给 **go-zero** 投上一票：[https://www.oschina.net/p/go-zero](https://www.oschina.net/p/go-zero)

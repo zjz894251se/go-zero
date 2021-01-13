@@ -1,12 +1,18 @@
 package gen
 
 import (
+	"database/sql"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/tal-tech/go-zero/core/logx"
+	"github.com/tal-tech/go-zero/core/stringx"
+	"github.com/tal-tech/go-zero/tools/goctl/config"
+	"github.com/tal-tech/go-zero/tools/goctl/model/sql/builderx"
 )
 
 var (
@@ -22,15 +28,23 @@ func TestCacheModel(t *testing.T) {
 	defer func() {
 		_ = os.RemoveAll(dir)
 	}()
-	g := NewDefaultGenerator(source, cacheDir, NamingLower)
-	err := g.Start(true)
+	g, err := NewDefaultGenerator(cacheDir, &config.Config{
+		NamingFormat: "GoZero",
+	})
+	assert.Nil(t, err)
+
+	err = g.StartFromDDL(source, true)
 	assert.Nil(t, err)
 	assert.True(t, func() bool {
-		_, err := os.Stat(filepath.Join(cacheDir, "testuserinfomodel.go"))
+		_, err := os.Stat(filepath.Join(cacheDir, "TestUserInfoModel.go"))
 		return err == nil
 	}())
-	g = NewDefaultGenerator(source, noCacheDir, NamingLower)
-	err = g.Start(false)
+	g, err = NewDefaultGenerator(noCacheDir, &config.Config{
+		NamingFormat: "gozero",
+	})
+	assert.Nil(t, err)
+
+	err = g.StartFromDDL(source, false)
 	assert.Nil(t, err)
 	assert.True(t, func() bool {
 		_, err := os.Stat(filepath.Join(noCacheDir, "testuserinfomodel.go"))
@@ -47,18 +61,55 @@ func TestNamingModel(t *testing.T) {
 	defer func() {
 		_ = os.RemoveAll(dir)
 	}()
-	g := NewDefaultGenerator(source, camelDir, NamingCamel)
-	err := g.Start(true)
+	g, err := NewDefaultGenerator(camelDir, &config.Config{
+		NamingFormat: "GoZero",
+	})
+	assert.Nil(t, err)
+
+	err = g.StartFromDDL(source, true)
 	assert.Nil(t, err)
 	assert.True(t, func() bool {
 		_, err := os.Stat(filepath.Join(camelDir, "TestUserInfoModel.go"))
 		return err == nil
 	}())
-	g = NewDefaultGenerator(source, snakeDir, NamingSnake)
-	err = g.Start(true)
+	g, err = NewDefaultGenerator(snakeDir, &config.Config{
+		NamingFormat: "go_zero",
+	})
+	assert.Nil(t, err)
+
+	err = g.StartFromDDL(source, true)
 	assert.Nil(t, err)
 	assert.True(t, func() bool {
 		_, err := os.Stat(filepath.Join(snakeDir, "test_user_info_model.go"))
 		return err == nil
 	}())
+}
+
+func TestWrapWithRawString(t *testing.T) {
+	assert.Equal(t, "``", wrapWithRawString(""))
+	assert.Equal(t, "``", wrapWithRawString("``"))
+	assert.Equal(t, "`a`", wrapWithRawString("a"))
+	assert.Equal(t, "`   `", wrapWithRawString("   "))
+}
+
+func TestFields(t *testing.T) {
+	type Student struct {
+		Id         int64           `db:"id"`
+		Name       string          `db:"name"`
+		Age        sql.NullInt64   `db:"age"`
+		Score      sql.NullFloat64 `db:"score"`
+		CreateTime time.Time       `db:"create_time"`
+		UpdateTime sql.NullTime    `db:"update_time"`
+	}
+	var (
+		studentFieldNames          = builderx.RawFieldNames(&Student{})
+		studentRows                = strings.Join(studentFieldNames, ",")
+		studentRowsExpectAutoSet   = strings.Join(stringx.Remove(studentFieldNames, "`id`", "`create_time`", "`update_time`"), ",")
+		studentRowsWithPlaceHolder = strings.Join(stringx.Remove(studentFieldNames, "`id`", "`create_time`", "`update_time`"), "=?,") + "=?"
+	)
+
+	assert.Equal(t, []string{"`id`", "`name`", "`age`", "`score`", "`create_time`", "`update_time`"}, studentFieldNames)
+	assert.Equal(t, "`id`,`name`,`age`,`score`,`create_time`,`update_time`", studentRows)
+	assert.Equal(t, "`name`,`age`,`score`", studentRowsExpectAutoSet)
+	assert.Equal(t, "`name`=?,`age`=?,`score`=?", studentRowsWithPlaceHolder)
 }

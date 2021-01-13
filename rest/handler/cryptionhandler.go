@@ -83,6 +83,12 @@ func newCryptionResponseWriter(w http.ResponseWriter) *cryptionResponseWriter {
 	}
 }
 
+func (w *cryptionResponseWriter) Flush() {
+	if flusher, ok := w.ResponseWriter.(http.Flusher); ok {
+		flusher.Flush()
+	}
+}
+
 func (w *cryptionResponseWriter) Header() http.Header {
 	return w.ResponseWriter.Header()
 }

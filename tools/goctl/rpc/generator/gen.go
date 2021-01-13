@@ -3,6 +3,7 @@ package generator
 import (
 	"path/filepath"
 
+	conf "github.com/tal-tech/go-zero/tools/goctl/config"
 	"github.com/tal-tech/go-zero/tools/goctl/rpc/parser"
 	"github.com/tal-tech/go-zero/tools/goctl/util"
 	"github.com/tal-tech/go-zero/tools/goctl/util/console"
@@ -10,16 +11,22 @@ import (
 )
 
 type RpcGenerator struct {
-	g Generator
+	g   Generator
+	cfg *conf.Config
 }
 
-func NewDefaultRpcGenerator() *RpcGenerator {
-	return NewRpcGenerator(NewDefaultGenerator())
+func NewDefaultRpcGenerator(style string) (*RpcGenerator, error) {
+	cfg, err := conf.NewConfig(style)
+	if err != nil {
+		return nil, err
+	}
+	return NewRpcGenerator(NewDefaultGenerator(), cfg), nil
 }
 
-func NewRpcGenerator(g Generator) *RpcGenerator {
+func NewRpcGenerator(g Generator, cfg *conf.Config) *RpcGenerator {
 	return &RpcGenerator{
-		g: g,
+		g:   g,
+		cfg: cfg,
 	}
 }
 
@@ -55,42 +62,42 @@ func (g *RpcGenerator) Generate(src, target string, protoImportPath []string) er
 		return err
 	}
 
-	err = g.g.GenEtc(dirCtx, proto)
+	err = g.g.GenEtc(dirCtx, proto, g.cfg)
 	if err != nil {
 		return err
 	}
 
-	err = g.g.GenPb(dirCtx, protoImportPath, proto)
+	err = g.g.GenPb(dirCtx, protoImportPath, proto, g.cfg)
 	if err != nil {
 		return err
 	}
 
-	err = g.g.GenConfig(dirCtx, proto)
+	err = g.g.GenConfig(dirCtx, proto, g.cfg)
 	if err != nil {
 		return err
 	}
 
-	err = g.g.GenSvc(dirCtx, proto)
+	err = g.g.GenSvc(dirCtx, proto, g.cfg)
 	if err != nil {
 		return err
 	}
 
-	err = g.g.GenLogic(dirCtx, proto)
+	err = g.g.GenLogic(dirCtx, proto, g.cfg)
 	if err != nil {
 		return err
 	}
 
-	err = g.g.GenServer(dirCtx, proto)
+	err = g.g.GenServer(dirCtx, proto, g.cfg)
 	if err != nil {
 		return err
 	}
 
-	err = g.g.GenMain(dirCtx, proto)
+	err = g.g.GenMain(dirCtx, proto, g.cfg)
 	if err != nil {
 		return err
 	}
 
-	err = g.g.GenCall(dirCtx, proto)
+	err = g.g.GenCall(dirCtx, proto, g.cfg)
 
 	console.NewColorConsole().MarkDone()
 

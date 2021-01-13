@@ -129,7 +129,7 @@ go get -u github.com/tal-tech/go-zero
    the .api files also can be generate by goctl, like below:
 
    ```shell
-goctl api -o greet.api
+   goctl api -o greet.api
    ```
    
 3. generate the go server side code
@@ -174,7 +174,7 @@ goctl api -o greet.api
    you can check it by curl:
 
    ```shell
-   curl -i http://localhost:8888/greet/from/you
+   curl -i http://localhost:8888/from/you
    ```
 
    the response looks like:
@@ -208,3 +208,7 @@ goctl api -o greet.api
 
 * [Rapid development of microservice systems](https://github.com/tal-tech/zero-doc/blob/main/doc/shorturl-en.md)
 * [Rapid development of microservice systems - multiple RPCs](https://github.com/tal-tech/zero-doc/blob/main/doc/bookstore-en.md)
+
+## 9. Chat group
+
+Join the chat via https://discord.gg/4JQvC5A4Fe

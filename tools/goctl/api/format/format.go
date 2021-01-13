@@ -9,18 +9,20 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/tal-tech/go-zero/core/errorx"
 	"github.com/tal-tech/go-zero/tools/goctl/api/parser"
 	"github.com/tal-tech/go-zero/tools/goctl/api/util"
+	ctlutil "github.com/tal-tech/go-zero/tools/goctl/util"
 	"github.com/urfave/cli"
 )
 
-var (
-	reg = regexp.MustCompile("type (?P<name>.*)[\\s]+{")
+const (
+	leftParenthesis  = "("
+	rightParenthesis = ")"
+	leftBrace        = "{"
+	rightBrace       = "}"
 )
 
 func GoFormatApi(c *cli.Context) error {
@@ -95,86 +97,120 @@ func ApiFormatByPath(apiFilePath string) error {
 }
 
 func apiFormat(data string) (string, error) {
-	r := reg.ReplaceAllStringFunc(data, func(m string) string {
-		parts := reg.FindStringSubmatch(m)
-		if len(parts) < 2 {
-			return m
-		}
-		if !strings.Contains(m, "struct") {
-			return "type " + parts[1] + " struct {"
-		}
-		return m
-	})
-
-	apiStruct, err := parser.ParseApi(r)
+	_, err := parser.ParseContent(data)
 	if err != nil {
 		return "", err
 	}
-	info := strings.TrimSpace(apiStruct.Info)
-	if len(apiStruct.Service) == 0 {
-		return data, nil
-	}
 
-	fs, err := format.Source([]byte(strings.TrimSpace(apiStruct.StructBody)))
-	if err != nil {
-		str := err.Error()
-		lineNumber := strings.Index(str, ":")
-		if lineNumber > 0 {
-			ln, err := strconv.ParseInt(str[:lineNumber], 10, 64)
+	var builder strings.Builder
+	s := bufio.NewScanner(strings.NewReader(data))
+	var tapCount = 0
+	var newLineCount = 0
+	var preLine string
+	for s.Scan() {
+		line := strings.TrimSpace(s.Text())
+		if len(line) == 0 {
+			if newLineCount > 0 {
+				continue
+			}
+			newLineCount++
+		} else {
+			if preLine == rightBrace {
+				builder.WriteString(ctlutil.NL)
+			}
+			newLineCount = 0
+		}
+
+		if tapCount == 0 {
+			format, err := formatGoTypeDef(line, s, &builder)
 			if err != nil {
 				return "", err
 			}
-			pn := 0
-			if len(info) > 0 {
-				pn = countRune(info, '\n') + 1
+
+			if format {
+				continue
 			}
-			number := int(ln) + pn + 1
-			return "", errors.New(fmt.Sprintf("line: %d, %s", number, str[lineNumber+1:]))
 		}
-		return "", err
-	}
 
-	var result string
-	if len(strings.TrimSpace(info)) > 0 {
-		result += strings.TrimSpace(info) + "\n\n"
-	}
-	if len(strings.TrimSpace(apiStruct.Imports)) > 0 {
-		result += strings.TrimSpace(apiStruct.Imports) + "\n\n"
-	}
-	if len(strings.TrimSpace(string(fs))) > 0 {
-		result += strings.TrimSpace(string(fs)) + "\n\n"
-	}
-	if len(strings.TrimSpace(apiStruct.Service)) > 0 {
-		result += formatService(apiStruct.Service) + "\n\n"
-	}
-
-	return strings.TrimSpace(result), nil
-}
-
-func formatService(str string) string {
-	var builder strings.Builder
-	scanner := bufio.NewScanner(strings.NewReader(str))
-	var tapCount = 0
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if line == ")" || line == "}" {
+		noCommentLine := util.RemoveComment(line)
+		if noCommentLine == rightParenthesis || noCommentLine == rightBrace {
 			tapCount -= 1
 		}
+		if tapCount < 0 {
+			line := strings.TrimSuffix(noCommentLine, rightBrace)
+			line = strings.TrimSpace(line)
+			if strings.HasSuffix(line, leftBrace) {
+				tapCount += 1
+			}
+		}
 		util.WriteIndent(&builder, tapCount)
-		builder.WriteString(line + "\n")
-		if strings.HasSuffix(line, "(") || strings.HasSuffix(line, "{") {
+		builder.WriteString(line + ctlutil.NL)
+		if strings.HasSuffix(noCommentLine, leftParenthesis) || strings.HasSuffix(noCommentLine, leftBrace) {
 			tapCount += 1
 		}
+		preLine = line
 	}
-	return strings.TrimSpace(builder.String())
+	return strings.TrimSpace(builder.String()), nil
 }
 
-func countRune(s string, r rune) int {
-	count := 0
-	for _, c := range s {
-		if c == r {
-			count++
+func formatGoTypeDef(line string, scanner *bufio.Scanner, builder *strings.Builder) (bool, error) {
+	noCommentLine := util.RemoveComment(line)
+	tokenCount := 0
+	if strings.HasPrefix(noCommentLine, "type") && (strings.HasSuffix(noCommentLine, leftParenthesis) ||
+		strings.HasSuffix(noCommentLine, leftBrace)) {
+		var typeBuilder strings.Builder
+		typeBuilder.WriteString(mayInsertStructKeyword(line, &tokenCount) + ctlutil.NL)
+		for scanner.Scan() {
+			noCommentLine := util.RemoveComment(scanner.Text())
+			typeBuilder.WriteString(mayInsertStructKeyword(scanner.Text(), &tokenCount) + ctlutil.NL)
+			if noCommentLine == rightBrace || noCommentLine == rightParenthesis {
+				tokenCount--
+			}
+			if tokenCount == 0 {
+				ts, err := format.Source([]byte(typeBuilder.String()))
+				if err != nil {
+					return false, errors.New("error format \n" + typeBuilder.String())
+				}
+
+				result := strings.ReplaceAll(string(ts), " struct ", " ")
+				result = strings.ReplaceAll(result, "type ()", "")
+				builder.WriteString(result)
+				break
+			}
+		}
+
+		return true, nil
+	}
+	return false, nil
+}
+
+func mayInsertStructKeyword(line string, token *int) string {
+	insertStruct := func() string {
+		if strings.Contains(line, " struct") {
+			return line
+		}
+		index := strings.Index(line, leftBrace)
+		return line[:index] + " struct " + line[index:]
+	}
+
+	noCommentLine := util.RemoveComment(line)
+	if strings.HasSuffix(noCommentLine, leftBrace) {
+		*token++
+		return insertStruct()
+	}
+	if strings.HasSuffix(noCommentLine, rightBrace) {
+		noCommentLine = strings.TrimSuffix(noCommentLine, rightBrace)
+		noCommentLine = util.RemoveComment(noCommentLine)
+		if strings.HasSuffix(noCommentLine, leftBrace) {
+			return insertStruct()
 		}
 	}
-	return count
+	if strings.HasSuffix(noCommentLine, leftParenthesis) {
+		*token++
+	}
+
+	if strings.Contains(noCommentLine, "`") {
+		return util.UpperFirst(strings.TrimSpace(line))
+	}
+	return line
 }

@@ -6,11 +6,9 @@ import (
 	"unicode"
 )
 
-type (
-	String struct {
-		source string
-	}
-)
+type String struct {
+	source string
+}
 
 func From(data string) String {
 	return String{source: data}
@@ -29,9 +27,15 @@ func (s String) IsEmptyOrSpace() bool {
 func (s String) Lower() string {
 	return strings.ToLower(s.source)
 }
-func (s String) Upper() string {
-	return strings.ToUpper(s.source)
+
+func (s String) ReplaceAll(old, new string) string {
+	return strings.ReplaceAll(s.source, old, new)
 }
+
+func (s String) Source() string {
+	return s.source
+}
+
 func (s String) Title() string {
 	if s.IsEmptyOrSpace() {
 		return s.source
@@ -62,7 +66,7 @@ func (s String) ToSnake() string {
 }
 
 // return original string if rune is not letter at index 0
-func (s String) UnTitle() string {
+func (s String) Untitle() string {
 	if s.IsEmptyOrSpace() {
 		return s.source
 	}
@@ -71,6 +75,10 @@ func (s String) UnTitle() string {
 		return s.source
 	}
 	return string(unicode.ToLower(r)) + s.source[1:]
+}
+
+func (s String) Upper() string {
+	return strings.ToUpper(s.source)
 }
 
 // it will not ignore spaces
@@ -97,12 +105,4 @@ func (s String) splitBy(fn func(r rune) bool, remove bool) []string {
 		list = append(list, buffer.String())
 	}
 	return list
-}
-
-func (s String) ReplaceAll(old, new string) string {
-	return strings.ReplaceAll(s.source, old, new)
-}
-
-func (s String) Source() string {
-	return s.source
 }

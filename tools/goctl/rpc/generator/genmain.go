@@ -5,8 +5,10 @@ import (
 	"path/filepath"
 	"strings"
 
+	conf "github.com/tal-tech/go-zero/tools/goctl/config"
 	"github.com/tal-tech/go-zero/tools/goctl/rpc/parser"
 	"github.com/tal-tech/go-zero/tools/goctl/util"
+	"github.com/tal-tech/go-zero/tools/goctl/util/format"
 	"github.com/tal-tech/go-zero/tools/goctl/util/stringx"
 )
 
@@ -45,10 +47,13 @@ func main() {
 }
 `
 
-func (g *defaultGenerator) GenMain(ctx DirContext, proto parser.Proto) error {
-	dir := ctx.GetMain()
-	serviceNameLower := formatFilename(ctx.GetMain().Base)
-	fileName := filepath.Join(dir.Filename, fmt.Sprintf("%v.go", serviceNameLower))
+func (g *defaultGenerator) GenMain(ctx DirContext, proto parser.Proto, cfg *conf.Config) error {
+	mainFilename, err := format.FileNamingFormat(cfg.NamingFormat, ctx.GetServiceName().Source())
+	if err != nil {
+		return err
+	}
+
+	fileName := filepath.Join(ctx.GetMain().Filename, fmt.Sprintf("%v.go", mainFilename))
 	imports := make([]string, 0)
 	pbImport := fmt.Sprintf(`"%v"`, ctx.GetPb().Package)
 	svcImport := fmt.Sprintf(`"%v"`, ctx.GetSvc().Package)
@@ -63,7 +68,7 @@ func (g *defaultGenerator) GenMain(ctx DirContext, proto parser.Proto) error {
 
 	return util.With("main").GoFmt(true).Parse(text).SaveTo(map[string]interface{}{
 		"head":        head,
-		"serviceName": serviceNameLower,
+		"serviceName": strings.ToLower(ctx.GetServiceName().ToCamel()),
 		"imports":     strings.Join(imports, util.NL),
 		"pkg":         proto.PbPackage,
 		"serviceNew":  stringx.From(proto.Service.Name).ToCamel(),

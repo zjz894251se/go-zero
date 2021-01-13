@@ -16,16 +16,20 @@ import (
 const testApiTemplate = `
 info(
     title: doc title
-    desc: >
+    desc: ">
     doc description first part,
-    doc description second part<
+    doc description second part<"
     version: 1.0
 )
 
-type Request struct {
-  Name string ` + "`" + `path:"name,options=you|me"` + "`" + `
-}
+// TODO: test
+// {
+type Request struct {  // TODO: test
+  // TODO
+  Name string ` + "`" + `path:"name,options=you|me"` + "`" + `   // }
+} // TODO: test
 
+// TODO: test
 type Response struct {
   Message string ` + "`" + `json:"message"` + "`" + `
 }
@@ -51,9 +55,7 @@ service A-api {
 const testMultiServiceTemplate = `
 info(
     title: doc title
-    desc: >
-    doc description first part,
-    doc description second part<
+    desc: doc description first part
     version: 1.0
 )
 
@@ -225,7 +227,7 @@ type Response struct {
 }
 
 service A-api {
-  @doc(helloworld)
+  @doc ("helloworld")
   @server(
     handler: GreetHandler
   )
@@ -245,7 +247,7 @@ type Response struct {
 }
 
 service A-api {
-  @doc(helloworld)
+  @doc ("helloworld")
   @server(
     handler: GreetHandler
   )
@@ -279,26 +281,59 @@ service A-api {
 }
 `
 
+const noStructTagApi = `
+type Request {
+  Name string ` + "`" + `path:"name,options=you|me"` + "`" + `
+}
+
+type XXX {}
+
+type (
+	Response {
+  		Message string ` + "`" + `json:"message"` + "`" + `
+	}
+
+	A {}
+
+	B struct {}
+)
+
+service A-api {
+  @handler GreetHandler
+  get /greet/from/:name(Request) returns (Response)
+}
+`
+
+const nestTypeApi = `
+type Request {
+  Name string ` + "`" + `path:"name,options=you|me"` + "`" + `
+  XXX struct {
+  }
+}
+
+service A-api {
+  @handler GreetHandler
+  get /greet/from/:name(Request)
+}
+`
+
 func TestParser(t *testing.T) {
 	filename := "greet.api"
 	err := ioutil.WriteFile(filename, []byte(testApiTemplate), os.ModePerm)
 	assert.Nil(t, err)
 	defer os.Remove(filename)
 
-	parser, err := parser.NewParser(filename)
-	assert.Nil(t, err)
-
-	api, err := parser.Parse()
+	api, err := parser.Parse(filename)
 	assert.Nil(t, err)
 
 	assert.Equal(t, len(api.Types), 2)
-	assert.Equal(t, len(api.Service.Routes), 2)
+	assert.Equal(t, len(api.Service.Routes()), 2)
 
-	assert.Equal(t, api.Service.Routes[0].Path, "/greet/from/:name")
-	assert.Equal(t, api.Service.Routes[1].Path, "/greet/get")
+	assert.Equal(t, api.Service.Routes()[0].Path, "/greet/from/:name")
+	assert.Equal(t, api.Service.Routes()[1].Path, "/greet/get")
 
-	assert.Equal(t, api.Service.Routes[1].RequestType.Name, "Request")
-	assert.Equal(t, api.Service.Routes[1].ResponseType.Name, "")
+	assert.Equal(t, api.Service.Routes()[1].RequestTypeName(), "Request")
+	assert.Equal(t, api.Service.Routes()[1].ResponseType, nil)
 
 	validate(t, filename)
 }
@@ -309,13 +344,10 @@ func TestMultiService(t *testing.T) {
 	assert.Nil(t, err)
 	defer os.Remove(filename)
 
-	parser, err := parser.NewParser(filename)
+	api, err := parser.Parse(filename)
 	assert.Nil(t, err)
 
-	api, err := parser.Parse()
-	assert.Nil(t, err)
-
-	assert.Equal(t, len(api.Service.Routes), 2)
+	assert.Equal(t, len(api.Service.Routes()), 2)
 	assert.Equal(t, len(api.Service.Groups), 2)
 
 	validate(t, filename)
@@ -327,10 +359,7 @@ func TestApiNoInfo(t *testing.T) {
 	assert.Nil(t, err)
 	defer os.Remove(filename)
 
-	parser, err := parser.NewParser(filename)
-	assert.Nil(t, err)
-
-	_, err = parser.Parse()
+	_, err = parser.Parse(filename)
 	assert.Nil(t, err)
 
 	validate(t, filename)
@@ -342,10 +371,7 @@ func TestInvalidApiFile(t *testing.T) {
 	assert.Nil(t, err)
 	defer os.Remove(filename)
 
-	parser, err := parser.NewParser(filename)
-	assert.Nil(t, err)
-
-	_, err = parser.Parse()
+	_, err = parser.Parse(filename)
 	assert.NotNil(t, err)
 }
 
@@ -355,14 +381,11 @@ func TestAnonymousAnnotation(t *testing.T) {
 	assert.Nil(t, err)
 	defer os.Remove(filename)
 
-	parser, err := parser.NewParser(filename)
+	api, err := parser.Parse(filename)
 	assert.Nil(t, err)
 
-	api, err := parser.Parse()
-	assert.Nil(t, err)
-
-	assert.Equal(t, len(api.Service.Routes), 1)
-	assert.Equal(t, api.Service.Routes[0].Annotations[0].Value, "GreetHandler")
+	assert.Equal(t, len(api.Service.Routes()), 1)
+	assert.Equal(t, api.Service.Routes()[0].Handler, "GreetHandler")
 
 	validate(t, filename)
 }
@@ -373,10 +396,7 @@ func TestApiHasMiddleware(t *testing.T) {
 	assert.Nil(t, err)
 	defer os.Remove(filename)
 
-	parser, err := parser.NewParser(filename)
-	assert.Nil(t, err)
-
-	_, err = parser.Parse()
+	_, err = parser.Parse(filename)
 	assert.Nil(t, err)
 
 	validate(t, filename)
@@ -388,10 +408,7 @@ func TestApiHasJwt(t *testing.T) {
 	assert.Nil(t, err)
 	defer os.Remove(filename)
 
-	parser, err := parser.NewParser(filename)
-	assert.Nil(t, err)
-
-	_, err = parser.Parse()
+	_, err = parser.Parse(filename)
 	assert.Nil(t, err)
 
 	validate(t, filename)
@@ -403,10 +420,7 @@ func TestApiHasJwtAndMiddleware(t *testing.T) {
 	assert.Nil(t, err)
 	defer os.Remove(filename)
 
-	parser, err := parser.NewParser(filename)
-	assert.Nil(t, err)
-
-	_, err = parser.Parse()
+	_, err = parser.Parse(filename)
 	assert.Nil(t, err)
 
 	validate(t, filename)
@@ -418,13 +432,8 @@ func TestApiHasNoRequestBody(t *testing.T) {
 	assert.Nil(t, err)
 	defer os.Remove(filename)
 
-	parser, err := parser.NewParser(filename)
+	_, err = parser.Parse(filename)
 	assert.Nil(t, err)
-
-	_, err = parser.Parse()
-	assert.Nil(t, err)
-
-	validate(t, filename)
 }
 
 func TestApiRoutes(t *testing.T) {
@@ -433,10 +442,7 @@ func TestApiRoutes(t *testing.T) {
 	assert.Nil(t, err)
 	defer os.Remove(filename)
 
-	parser, err := parser.NewParser(filename)
-	assert.Nil(t, err)
-
-	_, err = parser.Parse()
+	_, err = parser.Parse(filename)
 	assert.Nil(t, err)
 
 	validate(t, filename)
@@ -448,10 +454,7 @@ func TestHasCommentRoutes(t *testing.T) {
 	assert.Nil(t, err)
 	defer os.Remove(filename)
 
-	parser, err := parser.NewParser(filename)
-	assert.Nil(t, err)
-
-	_, err = parser.Parse()
+	_, err = parser.Parse(filename)
 	assert.Nil(t, err)
 
 	validate(t, filename)
@@ -463,13 +466,8 @@ func TestInlineTypeNotExist(t *testing.T) {
 	assert.Nil(t, err)
 	defer os.Remove(filename)
 
-	parser, err := parser.NewParser(filename)
-	assert.Nil(t, err)
-
-	_, err = parser.Parse()
-	assert.Nil(t, err)
-
-	validate(t, filename)
+	_, err = parser.Parse(filename)
+	assert.NotNil(t, err)
 }
 
 func TestHasImportApi(t *testing.T) {
@@ -483,27 +481,64 @@ func TestHasImportApi(t *testing.T) {
 	assert.Nil(t, err)
 	defer os.Remove(importApiName)
 
-	parser, err := parser.NewParser(filename)
-	assert.Nil(t, err)
-
-	api, err := parser.Parse()
+	api, err := parser.Parse(filename)
 	assert.Nil(t, err)
 
 	var hasInline bool
 	for _, ty := range api.Types {
-		if ty.Name == "ImportData" {
+		if ty.Name() == "ImportData" {
 			hasInline = true
 			break
 		}
 	}
 	assert.True(t, hasInline)
+
 	validate(t, filename)
 }
 
+func TestNoStructApi(t *testing.T) {
+	filename := "greet.api"
+	err := ioutil.WriteFile(filename, []byte(noStructTagApi), os.ModePerm)
+	assert.Nil(t, err)
+	defer os.Remove(filename)
+
+	spec, err := parser.Parse(filename)
+	assert.Nil(t, err)
+	assert.Equal(t, len(spec.Types), 5)
+
+	validate(t, filename)
+}
+
+func TestNestTypeApi(t *testing.T) {
+	filename := "greet.api"
+	err := ioutil.WriteFile(filename, []byte(nestTypeApi), os.ModePerm)
+	assert.Nil(t, err)
+	defer os.Remove(filename)
+
+	_, err = parser.Parse(filename)
+	assert.NotNil(t, err)
+}
+
+func TestCamelStyle(t *testing.T) {
+	filename := "greet.api"
+	err := ioutil.WriteFile(filename, []byte(testApiTemplate), os.ModePerm)
+	assert.Nil(t, err)
+	defer os.Remove(filename)
+
+	_, err = parser.Parse(filename)
+	assert.Nil(t, err)
+
+	validateWithCamel(t, filename, "GoZero")
+}
+
 func validate(t *testing.T, api string) {
+	validateWithCamel(t, api, "gozero")
+}
+
+func validateWithCamel(t *testing.T, api, camel string) {
 	dir := "_go"
 	os.RemoveAll(dir)
-	err := DoGenProject(api, dir)
+	err := DoGenProject(api, dir, camel)
 	defer os.RemoveAll(dir)
 	assert.Nil(t, err)
 	filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {

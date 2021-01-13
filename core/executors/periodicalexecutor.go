@@ -3,6 +3,7 @@ package executors
 import (
 	"reflect"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/tal-tech/go-zero/core/lang"
@@ -35,6 +36,7 @@ type (
 		// avoid race condition on waitGroup when calling wg.Add/Done/Wait(...)
 		wgBarrier   syncx.Barrier
 		confirmChan chan lang.PlaceholderType
+		inflight    int32
 		guarded     bool
 		newTicker   func(duration time.Duration) timex.Ticker
 		lock        sync.Mutex
@@ -91,18 +93,16 @@ func (pe *PeriodicalExecutor) Wait() {
 func (pe *PeriodicalExecutor) addAndCheck(task interface{}) (interface{}, bool) {
 	pe.lock.Lock()
 	defer func() {
-		var start bool
 		if !pe.guarded {
 			pe.guarded = true
-			start = true
+			// defer to unlock quickly
+			defer pe.backgroundFlush()
 		}
 		pe.lock.Unlock()
-		if start {
-			pe.backgroundFlush()
-		}
 	}()
 
 	if pe.container.AddTask(task) {
+		atomic.AddInt32(&pe.inflight, 1)
 		return pe.container.RemoveAll(), true
 	}
 
@@ -111,6 +111,9 @@ func (pe *PeriodicalExecutor) addAndCheck(task interface{}) (interface{}, bool) 
 
 func (pe *PeriodicalExecutor) backgroundFlush() {
 	threading.GoSafe(func() {
+		// flush before quit goroutine to avoid missing tasks
+		defer pe.Flush()
+
 		ticker := pe.newTicker(pe.interval)
 		defer ticker.Stop()
 
@@ -120,6 +123,7 @@ func (pe *PeriodicalExecutor) backgroundFlush() {
 			select {
 			case vals := <-pe.commander:
 				commanded = true
+				atomic.AddInt32(&pe.inflight, -1)
 				pe.enterExecution()
 				pe.confirmChan <- lang.Placeholder
 				pe.executeTasks(vals)
@@ -129,13 +133,7 @@ func (pe *PeriodicalExecutor) backgroundFlush() {
 					commanded = false
 				} else if pe.Flush() {
 					last = timex.Now()
-				} else if timex.Since(last) > pe.interval*idleRound {
-					pe.lock.Lock()
-					pe.guarded = false
-					pe.lock.Unlock()
-
-					// flush again to avoid missing tasks
-					pe.Flush()
+				} else if pe.shallQuit(last) {
 					return
 				}
 			}
@@ -177,4 +175,20 @@ func (pe *PeriodicalExecutor) hasTasks(tasks interface{}) bool {
 		// unknown type, let caller execute it
 		return true
 	}
+}
+
+func (pe *PeriodicalExecutor) shallQuit(last time.Duration) (stop bool) {
+	if timex.Since(last) <= pe.interval*idleRound {
+		return
+	}
+
+	// checking pe.inflight and setting pe.guarded should be locked together
+	pe.lock.Lock()
+	if atomic.LoadInt32(&pe.inflight) == 0 {
+		pe.guarded = false
+		stop = true
+	}
+	pe.lock.Unlock()
+
+	return
 }
