@@ -181,12 +181,21 @@ func addParam(result *Result, k, v string) {
 
 func match(pat, token string) innerResult {
 	if pat[0] == colon {
+		widely := pat[len(pat)-1] == '*'
+		if widely {
+			return innerResult{
+				key:   pat[1:len(pat)-1],
+				value: token,
+				named: true,
+				found: true,
+				widely:widely,
+			}
+		}
 		return innerResult{
 			key:   pat[1:],
 			value: token,
 			named: true,
 			found: true,
-			widely:pat[len(pat)-1] == '*',
 		}
 	}
 
