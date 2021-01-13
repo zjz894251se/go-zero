@@ -7,12 +7,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/tal-tech/go-zero/core/jsonx"
-	"github.com/tal-tech/go-zero/core/logx"
-	"github.com/tal-tech/go-zero/core/mathx"
-	"github.com/tal-tech/go-zero/core/stat"
-	"github.com/tal-tech/go-zero/core/stores/redis"
-	"github.com/tal-tech/go-zero/core/syncx"
+	"github.com/zjz894251se/go-zero/core/jsonx"
+	"github.com/zjz894251se/go-zero/core/logx"
+	"github.com/zjz894251se/go-zero/core/mathx"
+	"github.com/zjz894251se/go-zero/core/stat"
+	"github.com/zjz894251se/go-zero/core/stores/redis"
+	"github.com/zjz894251se/go-zero/core/syncx"
 )
 
 const (

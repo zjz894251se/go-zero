@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/tal-tech/go-zero/core/lang"
+	"github.com/zjz894251se/go-zero/core/lang"
 )
 
 func TestRoutineId(t *testing.T) {

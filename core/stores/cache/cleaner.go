@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/tal-tech/go-zero/core/collection"
-	"github.com/tal-tech/go-zero/core/logx"
-	"github.com/tal-tech/go-zero/core/proc"
+	"github.com/zjz894251se/go-zero/core/collection"
+	"github.com/zjz894251se/go-zero/core/logx"
+	"github.com/zjz894251se/go-zero/core/proc"
 	"github.com/tal-tech/go-zero/core/stat"
 	"github.com/tal-tech/go-zero/core/stringx"
 	"github.com/tal-tech/go-zero/core/threading"
