@@ -8,7 +8,7 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
-	"github.com/tal-tech/go-zero/core/logx"
+	"github.com/zjz894251se/go-zero/core/logx"
 )
 
 type mockedConn struct {

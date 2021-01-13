@@ -6,7 +6,7 @@ import (
 
 	"shorturl/api/internal/svc"
 
-	"github.com/tal-tech/go-zero/rest"
+	"github.com/zjz894251se/go-zero/rest"
 )
 
 func RegisterHandlers(engine *rest.Server, serverCtx *svc.ServiceContext) {

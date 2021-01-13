@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/tal-tech/go-zero/core/lang"
-	"github.com/tal-tech/go-zero/core/logx"
-	"github.com/tal-tech/go-zero/core/threading"
+	"github.com/zjz894251se/go-zero/core/lang"
+	"github.com/zjz894251se/go-zero/core/logx"
+	"github.com/zjz894251se/go-zero/core/threading"
 	"gopkg.in/cheggaaa/pb.v1"
 )
 

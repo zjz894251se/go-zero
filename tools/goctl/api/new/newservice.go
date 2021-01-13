@@ -6,9 +6,9 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/tal-tech/go-zero/tools/goctl/api/gogen"
-	conf "github.com/tal-tech/go-zero/tools/goctl/config"
-	"github.com/tal-tech/go-zero/tools/goctl/util"
+	"github.com/zjz894251se/go-zero/tools/goctl/api/gogen"
+	conf "github.com/zjz894251se/go-zero/tools/goctl/config"
+	"github.com/zjz894251se/go-zero/tools/goctl/util"
 	"github.com/urfave/cli"
 )
 

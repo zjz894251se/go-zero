@@ -7,7 +7,7 @@ import (
 	"shorturl/api/internal/types"
 	"shorturl/rpc/transform/transformer"
 
-	"github.com/tal-tech/go-zero/core/logx"
+	"github.com/zjz894251se/go-zero/core/logx"
 )
 
 type ShortenLogic struct {

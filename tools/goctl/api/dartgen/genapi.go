@@ -4,8 +4,8 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/tal-tech/go-zero/core/logx"
-	"github.com/tal-tech/go-zero/tools/goctl/api/spec"
+	"github.com/zjz894251se/go-zero/core/logx"
+	"github.com/zjz894251se/go-zero/tools/goctl/api/spec"
 )
 
 const apiTemplate = `import 'api.dart';

@@ -1,6 +1,6 @@
 package internal
 
-import "github.com/tal-tech/go-zero/core/discov"
+import "github.com/zjz894251se/go-zero/core/discov"
 
 func NewRpcPubServer(etcdEndpoints []string, etcdKey, listenOn string, opts ...ServerOption) (Server, error) {
 	registerEtcd := func() error {

@@ -8,11 +8,11 @@ import (
 	"path"
 	"strings"
 
-	"github.com/tal-tech/go-zero/tools/goctl/api/spec"
-	apiutil "github.com/tal-tech/go-zero/tools/goctl/api/util"
-	"github.com/tal-tech/go-zero/tools/goctl/config"
-	"github.com/tal-tech/go-zero/tools/goctl/util"
-	"github.com/tal-tech/go-zero/tools/goctl/util/format"
+	"github.com/zjz894251se/go-zero/tools/goctl/api/spec"
+	apiutil "github.com/zjz894251se/go-zero/tools/goctl/api/util"
+	"github.com/zjz894251se/go-zero/tools/goctl/config"
+	"github.com/zjz894251se/go-zero/tools/goctl/util"
+	"github.com/zjz894251se/go-zero/tools/goctl/util/format"
 )
 
 const (

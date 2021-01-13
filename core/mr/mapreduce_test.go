@@ -11,7 +11,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/zjz894251se/go-zero/core/stringx"
-	"github.com/tal-tech/go-zero/core/syncx"
+	"github.com/zjz894251se/go-zero/core/syncx"
 )
 
 var errDummy = errors.New("dummy")

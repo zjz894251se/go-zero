@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/tal-tech/go-zero/core/stringx"
-	"github.com/tal-tech/go-zero/tools/goctl/api/gogen"
-	"github.com/tal-tech/go-zero/tools/goctl/api/spec"
-	"github.com/tal-tech/go-zero/tools/goctl/api/util"
+	"github.com/zjz894251se/go-zero/core/stringx"
+	"github.com/zjz894251se/go-zero/tools/goctl/api/gogen"
+	"github.com/zjz894251se/go-zero/tools/goctl/api/spec"
+	"github.com/zjz894251se/go-zero/tools/goctl/api/util"
 )
 
 const (

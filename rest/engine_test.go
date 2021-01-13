@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/tal-tech/go-zero/core/conf"
+	"github.com/zjz894251se/go-zero/core/conf"
 )
 
 func TestNewEngine(t *testing.T) {

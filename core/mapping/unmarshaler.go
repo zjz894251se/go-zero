@@ -12,7 +12,7 @@ import (
 
 	"github.com/zjz894251se/go-zero/core/jsonx"
 	"github.com/zjz894251se/go-zero/core/lang"
-	"github.com/tal-tech/go-zero/core/stringx"
+	"github.com/zjz894251se/go-zero/core/stringx"
 )
 
 const (

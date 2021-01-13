@@ -8,12 +8,12 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/tal-tech/go-zero/core/collection"
-	"github.com/tal-tech/go-zero/tools/goctl/api/spec"
-	"github.com/tal-tech/go-zero/tools/goctl/config"
-	"github.com/tal-tech/go-zero/tools/goctl/util"
-	"github.com/tal-tech/go-zero/tools/goctl/util/format"
-	"github.com/tal-tech/go-zero/tools/goctl/vars"
+	"github.com/zjz894251se/go-zero/core/collection"
+	"github.com/zjz894251se/go-zero/tools/goctl/api/spec"
+	"github.com/zjz894251se/go-zero/tools/goctl/config"
+	"github.com/zjz894251se/go-zero/tools/goctl/util"
+	"github.com/zjz894251se/go-zero/tools/goctl/util/format"
+	"github.com/zjz894251se/go-zero/tools/goctl/vars"
 )
 
 const (

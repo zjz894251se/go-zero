@@ -1,8 +1,8 @@
 package gen
 
 import (
-	"github.com/tal-tech/go-zero/tools/goctl/model/sql/template"
-	"github.com/tal-tech/go-zero/tools/goctl/util"
+	"github.com/zjz894251se/go-zero/tools/goctl/model/sql/template"
+	"github.com/zjz894251se/go-zero/tools/goctl/util"
 )
 
 func genTypes(table Table, methods string, withCache bool) (string, error) {

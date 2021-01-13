@@ -3,7 +3,7 @@ package load
 import (
 	"io"
 
-	"github.com/tal-tech/go-zero/core/syncx"
+	"github.com/zjz894251se/go-zero/core/syncx"
 )
 
 type ShedderGroup struct {

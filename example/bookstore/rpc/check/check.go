@@ -12,9 +12,9 @@ import (
 	"bookstore/rpc/check/internal/server"
 	"bookstore/rpc/check/internal/svc"
 
-	"github.com/tal-tech/go-zero/core/conf"
-	"github.com/tal-tech/go-zero/core/logx"
-	"github.com/tal-tech/go-zero/zrpc"
+	"github.com/zjz894251se/go-zero/core/conf"
+	"github.com/zjz894251se/go-zero/core/logx"
+	"github.com/zjz894251se/go-zero/zrpc"
 	"google.golang.org/grpc"
 )
 

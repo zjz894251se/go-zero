@@ -3,7 +3,7 @@ package generator
 import (
 	"os/exec"
 
-	"github.com/tal-tech/go-zero/tools/goctl/util/console"
+	"github.com/zjz894251se/go-zero/tools/goctl/util/console"
 )
 
 type defaultGenerator struct {
