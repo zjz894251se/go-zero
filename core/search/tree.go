@@ -19,10 +19,11 @@ var (
 
 type (
 	innerResult struct {
-		key   string
-		value string
-		named bool
-		found bool
+		key    string
+		value  string
+		named  bool
+		found  bool
+		widely bool
 	}
 
 	node struct {
@@ -80,6 +81,11 @@ func (t *Tree) next(n *node, route string, result *Result) bool {
 			for _, children := range n.children {
 				for k, v := range children {
 					if r := match(k, token); r.found {
+						if r.named && r.widely{
+							addParam(result, r.key, route)
+							result.Item = v.item
+							return true
+						}
 						if t.next(v, route[i+1:], result) {
 							if r.named {
 								addParam(result, r.key, r.value)
@@ -180,6 +186,7 @@ func match(pat, token string) innerResult {
 			value: token,
 			named: true,
 			found: true,
+			widely:pat[len(pat)-1] == '*',
 		}
 	}
 
