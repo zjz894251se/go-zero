@@ -3,6 +3,7 @@ module github.com/zjz894251se/go-zero
 go 1.14
 
 require (
+    github.com/tal-tech/go-zero v1.1.2
 	github.com/ClickHouse/clickhouse-go v1.4.3
 	github.com/DATA-DOG/go-sqlmock v1.4.1
 	github.com/alicebob/miniredis/v2 v2.14.1
